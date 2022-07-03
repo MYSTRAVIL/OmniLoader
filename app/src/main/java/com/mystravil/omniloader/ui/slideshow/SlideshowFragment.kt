@@ -1,45 +1,81 @@
 package com.mystravil.omniloader.ui.slideshow
 
+import android.content.SharedPreferences
+import android.content.SharedPreferences.OnSharedPreferenceChangeListener
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.TextView
-import androidx.fragment.app.Fragment
-import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProvider
+import androidx.appcompat.app.AppCompatDelegate
+import androidx.preference.PreferenceFragmentCompat
+import androidx.preference.PreferenceManager
 import com.mystravil.omniloader.R
 import com.mystravil.omniloader.databinding.FragmentSlideshowBinding
 
-class SlideshowFragment : Fragment() {
 
-    private lateinit var slideshowViewModel: SlideshowViewModel
+class SlideshowFragment : PreferenceFragmentCompat() {
+
     private var _binding: FragmentSlideshowBinding? = null
 
-    // This property is only valid between onCreateView and
-    // onDestroyView.
-    private val binding get() = _binding!!
+    var listener =
+        OnSharedPreferenceChangeListener { prefs, key ->
+            Log.d("Settings", "trying to set dark mode pref")
+            if (key != null) {
+                Log.e("Settings", key)
+            }
+            val darkModeString = "Dark Mode"
+            key?.let {
+                if (it == darkModeString) prefs?.let { pref ->
+                    val darkModeValues = resources.getStringArray(R.array.dark_mode_values)
+                    Log.e("Settings", "setting dark mode pref")
+                    when (pref.getString(darkModeString, darkModeValues[0])) {
+                        darkModeValues[0] -> AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
+                        darkModeValues[1] -> AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
+                        darkModeValues[2] -> AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
+                        darkModeValues[3] -> AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_AUTO_BATTERY)
+                    }
+                }
+            }
+        }
 
-    override fun onCreateView(
-            inflater: LayoutInflater,
-            container: ViewGroup?,
-            savedInstanceState: Bundle?
-    ): View? {
-        slideshowViewModel =
-                ViewModelProvider(this).get(SlideshowViewModel::class.java)
-
-        _binding = FragmentSlideshowBinding.inflate(inflater, container, false)
-        val root: View = binding.root
-
-        val textView: TextView = binding.textSlideshow
-        slideshowViewModel.text.observe(viewLifecycleOwner, Observer {
-            textView.text = it
-        })
-        return root
+    override fun onResume() {
+        super.onResume()
+        preferenceManager.sharedPreferences!!.registerOnSharedPreferenceChangeListener(listener)
     }
+
+    override fun onPause() {
+        preferenceManager.sharedPreferences!!.unregisterOnSharedPreferenceChangeListener(listener)
+        super.onPause()
+    }
+
 
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+    }
+
+    override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
+        setPreferencesFromResource(R.xml.preferences, rootKey)
+    }
+
+    fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
+        Log.d("Settings", "trying to set dark mode pref")
+        if (key != null) {
+            Log.e("Settings", key)
+        }
+        val darkModeString = "Dark Mode"
+        key?.let {
+            if (it == darkModeString) sharedPreferences?.let { pref ->
+                val darkModeValues = resources.getStringArray(R.array.dark_mode_values)
+                Log.e("Settings", "setting dark mode pref")
+                when (pref.getString(darkModeString, darkModeValues[0])) {
+                    darkModeValues[0] -> AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
+                    darkModeValues[1] -> AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
+                    darkModeValues[2] -> AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
+                    darkModeValues[3] -> AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_AUTO_BATTERY)
+                }
+            }
+        }
     }
 }

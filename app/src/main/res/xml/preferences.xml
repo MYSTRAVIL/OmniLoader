@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <ListPreference
+        android:defaultValue="MODE_NIGHT_FOLLOW_SYSTEM"
+        android:entries="@array/dark_mode_entries"
+        android:entryValues="@array/dark_mode_values"
+        android:key="Dark Mode"
+        android:title="Theme"/>
+</PreferenceScreen>
